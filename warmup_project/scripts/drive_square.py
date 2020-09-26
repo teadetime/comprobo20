@@ -30,6 +30,7 @@ class tele(object):
         self.turning = False
         self.driving = True
         self.start_time = None
+        self.starting = True
 
     def process_odom(self, msg):
         self.pose = msg.pose.pose
@@ -46,22 +47,29 @@ class tele(object):
         self.start_time = rospy.Time.now()
         print(self.start_time, self.start_time + rospy.Duration(1))
         while not rospy.is_shutdown():
-            if self.turns > 0:
+            if self.starting:
+                self.linear_vel = 0
+                self.angular_vel = 0
+                self.starting = False
+            elif self.turns > 0:
                 if self.driving:
                     self.linear_vel = .2
-                    if rospy.Time.now() > self.start_time + rospy.Duration(1):
+                    print(rospy.Time.now(), (self.start_time + rospy.Duration(5)))
+                    if rospy.Time.now() > (self.start_time + rospy.Duration(5)):
                         print("Drove a meter")
                         self.linear_vel = 0
                         self.driving = False
                         self.turning = True
+                        self.start_time = rospy.Time.now()
                 if self.turning:
                     self.angular_vel = math.pi/(2*3)
                     if rospy.Time.now() > self.start_time + rospy.Duration(3):
                         print("turned")
-                        self.linear_vel = 0
+                        self.angular_vel = 0
                         self.driving = True
                         self.turning = False
                         self.turns -= 1
+                        self.start_time = rospy.Time.now()
 
 
             # print(self.state)
@@ -106,7 +114,7 @@ class tele(object):
             #     self.angular_vel += .1
             self.pub.publish(Twist(linear=Vector3(x=self.linear_vel),angular=Vector3(z=self.angular_vel)))
             r.sleep()
-
+        self.pub.publish(Twist(angular=Vector3(z=self.angular_vel)))
         # self.pub.publish(Twist(linear=Vector3(x=0), angular=Vector3(z=0)))
 
 
