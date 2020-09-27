@@ -1,0 +1,10 @@
+<!--
+  Spawns Neato inside a Gazebo simulation
+  -->
+<launch>
+  <arg name="robot_name" value="mobile_base"/>
+  <param name="use_sim_time" value="true"/>
+  <param name="robot_description"
+        command="$(find xacro)/xacro '$(find neato_description)/urdf/neato_standalone.urdf.xacro' load_camera:=false use_gpu_laser:=false"/>
+  
+</launch>
